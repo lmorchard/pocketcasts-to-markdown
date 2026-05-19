@@ -27,6 +27,16 @@ Les's answers to the kickoff questions:
 
 ## Running log
 
+### 2026-05-18 ~21:10 — Phase 5 render complete
+
+- `internal/render/markdown.go` is a pure function — takes pre-filtered `[]Episode` slices and renders Markdown via `text/template`. The renderer doesn't know about the DB; conversion happens in `cmd/render.go` via `toRenderEpisodes(...)`.
+- Pre-formatted fields on `render.Episode` (`PlayedUpToFormatted`, `PublishedFormatted`, `PodcastURL`) keep templates free of custom funcs. Users writing a custom template just access the field they want.
+- `--since` accepts either a Go duration (`168h`) or a date (`YYYY-MM-DD`). `--until` is YYYY-MM-DD only, treated as end-of-day. `--include` parses a comma-separated section list with friendly error messages on unknown tokens.
+- 8 render tests (FormatDuration, FormatDate, FromAPI round-trips, empty-collections, history+starred, empty-podcast-title edge case, custom template). 5 cmd flag-parsing tests.
+- **Default template handles NPR News-style empty `podcast_title`** — it conditionally emits the podcast link only when present, so we don't get `[](url)` in the output.
+- **Deferred:** "top-level run does sync + render" from the plan. The flag namespacing got messy (render needs `--since`/`--output`, sync needs none) and the cron usage is cleaner as explicit `sync && render`. Easy to add as a `cron` subcommand later if useful.
+- Live verified end-to-end: `render --since 48h` produces a clean Markdown report with history + starred sections.
+
 ### 2026-05-18 ~20:52 — Added `login` subcommand
 
 - Les flagged that keeping email+password in a config file isn't ideal. New `login` subcommand authenticates once and caches the token; subsequent `sync` runs need no credentials.

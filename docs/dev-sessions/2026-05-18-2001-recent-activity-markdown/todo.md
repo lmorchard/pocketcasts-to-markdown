@@ -44,11 +44,13 @@
 - [x] Live smoke test against real account: 100 history + 5 starred, second run reuses cached token
 
 ## Phase 5 — `render`
-- [ ] `internal/render/markdown.go`
-- [ ] Duration & date helpers
-- [ ] Flag parsing for `--since` (date or duration)
-- [ ] Top-level default = sync + render
-- [ ] Snapshot tests
+- [x] `internal/render/markdown.go` — `Render`, `Episode` view model, `FromAPI` constructor
+- [x] Duration & date helpers (`FormatDuration`, `FormatDate`)
+- [x] Flag parsing for `--since` (duration or YYYY-MM-DD), `--until`, `--limit`, `--include`, `--output`, `--template`
+- [x] Updated default.md to handle empty `PodcastTitle` (NPR-style episodes)
+- [x] 8 render tests + 5 cmd flag-parsing tests
+- [x] Live verified: `render --since 48h` produces valid Markdown with history + starred sections
+- [ ] _Deferred:_ Top-level default = sync + render — composing the two as a single cobra `Run` got messy with the flag namespacing; cleaner to leave them as explicit subcommands and let users chain `sync && render` in cron.
 
 ## Phase 6 — Polish
 - [ ] README + cron example

@@ -6,13 +6,13 @@ _Generated: {{ .Generated }}_
 ## Listening history
 
 {{ range .History -}}
-- **{{ if .URL }}[{{ .Title }}]({{ .URL }}){{ else }}{{ .Title }}{{ end }}** — [{{ .PodcastTitle }}]({{ .PodcastURL }}) · played {{ .PlayedUpToFormatted }}{{ if .Published }} · published {{ .PublishedFormatted }}{{ end }}
+- **{{ if .URL }}[{{ .Title }}]({{ .URL }}){{ else }}{{ .Title }}{{ end }}**{{ if .PodcastTitle }} — [{{ .PodcastTitle }}]({{ .PodcastURL }}){{ end }}{{ if .PlayedUpToFormatted }} · played {{ .PlayedUpToFormatted }}{{ end }}{{ if .PublishedFormatted }} · published {{ .PublishedFormatted }}{{ end }}
 {{ end }}
 {{- end }}
 {{ if .Starred -}}
 ## Starred
 
 {{ range .Starred -}}
-- **{{ if .URL }}[{{ .Title }}]({{ .URL }}){{ else }}{{ .Title }}{{ end }}** — [{{ .PodcastTitle }}]({{ .PodcastURL }})
+- **{{ if .URL }}[{{ .Title }}]({{ .URL }}){{ else }}{{ .Title }}{{ end }}**{{ if .PodcastTitle }} — [{{ .PodcastTitle }}]({{ .PodcastURL }}){{ end }}{{ if .PublishedFormatted }} · published {{ .PublishedFormatted }}{{ end }}
 {{ end }}
 {{- end }}
