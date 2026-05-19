@@ -27,6 +27,14 @@ Les's answers to the kickoff questions:
 
 ## Running log
 
+### 2026-05-18 ~20:35 — Phase 3 API client complete
+
+- `internal/pocketcasts/client.go` + `errors.go`. Options pattern (`WithBaseURL`, `WithHTTPClient`) so tests can point at `httptest.NewServer`.
+- Single private `do(ctx, op, path, body, authed, out)` handles marshal/header/Authorization/decode. Non-2xx → `*APIError` carrying op, status, and up to 4KiB of body for diagnostics.
+- `IsUnauthorized(err)` uses `errors.As` to detect 401 specifically — Phase 4 will use this to drive the relogin-and-retry path.
+- `Login` stores the token on the client AND returns it, so callers can decide whether to cache it.
+- 8 httptest tests cover success path, bad creds → APIError, missing token in response, history-without-token, bearer + decode, 401 on history, starred path, malformed JSON.
+
 ### 2026-05-18 ~20:25 — Phase 2 storage layer complete
 
 - Extended the scaffold's `internal/database` package rather than a new `internal/store` — keeps the package surface consistent with the skill's conventions and means migrations + upserts live next to each other.

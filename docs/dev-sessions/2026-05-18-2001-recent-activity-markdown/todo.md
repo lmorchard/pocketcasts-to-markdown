@@ -25,11 +25,12 @@
 - [x] `go vet ./...` clean, `golangci-lint run` clean
 
 ## Phase 3 — API client
-- [ ] `internal/pocketcasts/client.go`
-- [ ] `Login`, `History`, `Starred` methods
-- [ ] Response structs
-- [ ] Typed error with HTTP status
-- [ ] httptest unit tests
+- [x] `internal/pocketcasts/client.go` (`Client`, options pattern, `Login`, `History`, `Starred`)
+- [x] `internal/pocketcasts/errors.go` (`APIError`, `IsUnauthorized`, `ErrNotAuthenticated`)
+- [x] Response structs (`loginResponse`, `episodeListResponse`, `Episode`)
+- [x] Typed error with HTTP status — callers can `errors.As(&apiErr)` and check `StatusCode == 401`
+- [x] 8 httptest unit tests (request shape, auth header, 401 surfacing, decode errors)
+- [x] Removed duplicate `APIBaseURL` from `cmd/constants.go`
 
 ## Phase 4 — `sync`
 - [ ] Token cache load/store via kv
