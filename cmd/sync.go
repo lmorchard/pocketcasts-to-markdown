@@ -40,10 +40,6 @@ func runSync(cmd *cobra.Command, args []string) error {
 	log := GetLogger()
 	cfg := GetConfig()
 
-	if cfg.Email == "" || cfg.Password == "" {
-		return errors.New("POCKETCASTS_EMAIL and POCKETCASTS_PASSWORD must be set (env or config file)")
-	}
-
 	db, err := database.New(cfg.Database)
 	if err != nil {
 		return fmt.Errorf("open database: %w", err)
@@ -52,11 +48,16 @@ func runSync(cmd *cobra.Command, args []string) error {
 
 	client := pocketcasts.New()
 
-	// Restore cached token, if any. A 401 below will trigger a relogin.
 	cachedToken, hasCached, err := db.GetKV(kvAuthToken)
 	if err != nil {
 		return fmt.Errorf("read cached token: %w", err)
 	}
+	hasCreds := cfg.Email != "" && cfg.Password != ""
+
+	if !hasCached && !hasCreds {
+		return errors.New("no cached auth token and no credentials configured; run `pocketcasts-to-markdown login` (or set POCKETCASTS_EMAIL / POCKETCASTS_PASSWORD)")
+	}
+
 	if hasCached {
 		log.Debug("using cached auth token")
 		client.SetToken(cachedToken)
@@ -139,6 +140,9 @@ func syncStarred(
 
 // fetchWithRelogin runs fn(), and if it fails with 401, logs in fresh
 // (persisting the new token via saveToken) and retries once.
+//
+// When email and password are both empty, no relogin is attempted; a 401
+// is surfaced as an actionable error telling the user to run `login`.
 func fetchWithRelogin(
 	ctx context.Context,
 	log loggerLike,
@@ -154,6 +158,9 @@ func fetchWithRelogin(
 		}
 		if !pocketcasts.IsUnauthorized(err) {
 			return nil, err
+		}
+		if email == "" || password == "" {
+			return nil, errors.New("cached token expired and no credentials configured; run `pocketcasts-to-markdown login`")
 		}
 		log.Debug("cached token rejected (401); logging in fresh")
 	}

@@ -33,13 +33,15 @@
 - [x] Removed duplicate `APIBaseURL` from `cmd/constants.go`
 
 ## Phase 4 — `sync`
-- [ ] Token cache load/store via kv
-- [ ] 401 → re-login → retry once
-- [ ] Discover starred endpoint
-- [ ] Upsert history (in_history flag)
-- [ ] Upsert starred (is_starred flag)
-- [ ] Set sync.last_run_at
-- [ ] Summary log line
+- [x] Token cache load/store via kv (key `auth.token`)
+- [x] 401 → re-login → retry once (`fetchWithRelogin`, applies to both endpoints)
+- [x] `/user/starred` confirmed working — no probe needed
+- [x] Upsert history (`in_history` flag)
+- [x] Upsert starred (`is_starred` flag)
+- [x] Set `sync.last_run_at`
+- [x] Summary log line
+- [x] 4 unit tests for the 401/relogin paths
+- [x] Live smoke test against real account: 100 history + 5 starred, second run reuses cached token
 
 ## Phase 5 — `render`
 - [ ] `internal/render/markdown.go`

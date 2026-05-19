@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/lmorchard/pocketcasts-to-markdown/internal/pocketcasts"
@@ -133,6 +134,30 @@ func TestFetchWithRelogin_StaleTokenTriggersReloginAndRetry(t *testing.T) {
 	}
 	if saved != "fresh" {
 		t.Fatalf("expected saved=fresh, got %q", saved)
+	}
+}
+
+func TestFetchWithRelogin_StaleTokenNoCredsReturnsActionableError(t *testing.T) {
+	api := &fakeAPI{
+		staleToken: "stale",
+		freshToken: "fresh",
+	}
+	srv := httptest.NewServer(api.handler(t))
+	t.Cleanup(srv.Close)
+
+	client := pocketcasts.New(pocketcasts.WithBaseURL(srv.URL))
+	client.SetToken("stale")
+	save := func(string) error { t.Fatal("saveToken should not be called"); return nil }
+
+	_, err := fetchWithRelogin(context.Background(), nopLogger{}, client, "", "", save, client.History)
+	if err == nil {
+		t.Fatal("expected error, got nil")
+	}
+	if api.loginCalls != 0 {
+		t.Fatalf("expected zero login attempts, got %d", api.loginCalls)
+	}
+	if !strings.Contains(err.Error(), "login") {
+		t.Fatalf("expected error to mention `login`, got %v", err)
 	}
 }
 

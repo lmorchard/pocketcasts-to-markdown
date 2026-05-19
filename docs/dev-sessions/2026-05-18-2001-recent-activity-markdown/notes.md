@@ -27,6 +27,27 @@ Les's answers to the kickoff questions:
 
 ## Running log
 
+### 2026-05-18 ~20:52 — Added `login` subcommand
+
+- Les flagged that keeping email+password in a config file isn't ideal. New `login` subcommand authenticates once and caches the token; subsequent `sync` runs need no credentials.
+- Credential precedence for `login`: flags > env > config > `--password-stdin` (read from STDIN). The `--password-stdin` pattern follows `docker login`'s convention — secure, no shell history leak, scriptable.
+- `sync` now allows running with just a cached token (no creds). A 401 with no creds returns an actionable error pointing to the `login` command rather than silently failing.
+- **Dep excursion learned the hard way:** `go get golang.org/x/term@latest` transitively bumped `go.mod`'s `go` directive to `1.25.0`. CI uses Go 1.23, so that would have broken builds. Dropped x/term entirely (no-echo prompts not worth the dep churn for an unattended-cron tool); pinned `x/sys` back to v0.29.0; manually reset `go` directive to 1.21. `go.mod` / `go.sum` now identical to before the excursion.
+- Live test: `echo $PASS | login --email ... --password-stdin` cached the token; subsequent `sync` (no env, no config creds) pulled 100 history + 5 starred successfully.
+
+### 2026-05-18 ~20:48 — Phase 4 sync complete, live-verified
+
+- `cmd/sync.go` wires the API client to the storage layer. `fetchWithRelogin(ctx, log, client, email, password, saveToken, fn)` runs `fn`, on 401 logs in fresh, persists via the injected `saveToken` callback, and retries once. Both history and starred go through this path so token expiry between calls is handled too.
+- The `saveToken` callback (closing over `db.SetKV`) keeps the helper decoupled from the storage layer — easy to drive from `httptest` in unit tests.
+- 4 unit tests cover no-cached-token, valid-cached, stale-cached→relogin, and login-failure.
+- **Live smoke test against Les's real account:**
+  - Login worked. Token cached. Second run produced `using cached auth token` (no relogin).
+  - `/user/history` returned 100 episodes. JSON shape exactly matched our DTO.
+  - `/user/starred` returned 5 episodes — endpoint guess was correct.
+  - All 105 episodes have URLs; `duration` field IS populated (useful for render).
+  - NPR News episodes have empty `podcastTitle` — renderer should handle gracefully (fall back to title only, or "Unknown podcast").
+  - Second sync is idempotent: same 105 rows, no duplicates.
+
 ### 2026-05-18 ~20:35 — Phase 3 API client complete
 
 - `internal/pocketcasts/client.go` + `errors.go`. Options pattern (`WithBaseURL`, `WithHTTPClient`) so tests can point at `httptest.NewServer`.
