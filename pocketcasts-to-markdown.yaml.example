@@ -1,0 +1,24 @@
+# Configuration file for pocketcasts-to-markdown
+# Copy to one of:
+#   $XDG_CONFIG_HOME/pocketcasts-to-markdown/pocketcasts-to-markdown.yaml
+#   ./pocketcasts-to-markdown.yaml
+# Or pass --config <path>.
+
+# Pocket Casts credentials. Prefer env vars (POCKETCASTS_EMAIL,
+# POCKETCASTS_PASSWORD) over committing these to a file.
+email: ""
+password: ""
+
+# Path to the local SQLite archive.
+# Default: $XDG_STATE_HOME/pocketcasts-to-markdown/state.db
+# database: "/path/to/state.db"
+
+# Logging
+verbose: false
+debug: false
+log_json: false
+
+# Render defaults (override per-invocation with flags)
+# render:
+#   since: "168h"
+#   include: "history,starred"
