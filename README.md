@@ -99,6 +99,27 @@ customizable Markdown template into the current directory.
 
 ## Commands
 
+### `export`
+
+```text
+pocketcasts-to-markdown export --since <date|duration> [--until <date>] [-o <file>]
+```
+
+Orchestrator-friendly composition of `sync` + `render` over a single time
+window. The flag shape matches the contract used by
+[`me-to-markdown`](https://github.com/lmorchard/me-to-markdown) and the
+rest of the `*-to-markdown` family. Section selection, item limits, and
+template options are read from the config file or environment.
+
+```bash
+pocketcasts-to-markdown export --since 168h
+pocketcasts-to-markdown export --since 2026-05-11 --until 2026-05-18 -o pc.md
+```
+
+`--since` is required and accepts a Go duration (`168h`) or `YYYY-MM-DD`
+date. `--until` accepts `YYYY-MM-DD` and is treated as end-of-day
+inclusive.
+
 ### `login`
 
 ```text
