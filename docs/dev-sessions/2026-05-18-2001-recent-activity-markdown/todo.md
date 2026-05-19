@@ -13,14 +13,16 @@
 - [x] Update `.yaml.example`
 - [x] `make build` + `make test` green
 - [x] `golangci-lint run` clean (after `_ = conn.Close()` fix in scaffold-generated code)
-- [ ] Initial commit (awaiting confirmation)
+- [x] Initial commit (`bc934f4`)
+- [x] Skill bugs fixed upstream in `lmorchard/lmorchard-agent-skills` (`f6ba1d1`)
 
 ## Phase 2 — Storage
-- [ ] `internal/store/schema.sql` (episodes, kv)
-- [ ] `internal/store/store.go` (open, migrate, CRUD)
-- [ ] Upsert / kv get-set methods
-- [ ] `EpisodesBetween(since, until, filters)` query
-- [ ] Unit tests against temp DB
+- [x] Schema (already in `internal/database/schema.sql` from Phase 1)
+- [x] `internal/database/episodes.go` — `Episode`, `Source`, `UpsertEpisode`, `HistoryEpisodes`, `StarredEpisodes`
+- [x] `internal/database/kv.go` — `GetKV`, `SetKV`, `DeleteKV`
+- [x] Upsert uses `ON CONFLICT(uuid)` with sticky flag merge (`MAX(is_starred, excluded.is_starred)`)
+- [x] Unit tests against temp DB (9 tests, all green under `-race`)
+- [x] `go vet ./...` clean, `golangci-lint run` clean
 
 ## Phase 3 — API client
 - [ ] `internal/pocketcasts/client.go`

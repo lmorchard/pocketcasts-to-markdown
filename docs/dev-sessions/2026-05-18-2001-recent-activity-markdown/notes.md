@@ -27,6 +27,14 @@ Les's answers to the kickoff questions:
 
 ## Running log
 
+### 2026-05-18 ~20:25 — Phase 2 storage layer complete
+
+- Extended the scaffold's `internal/database` package rather than a new `internal/store` — keeps the package surface consistent with the skill's conventions and means migrations + upserts live next to each other.
+- **Sticky flag merge:** `ON CONFLICT(uuid) DO UPDATE ... is_starred = MAX(is_starred, excluded.is_starred)` — flags only go 0→1, never the reverse. Matches the "growing archive" decision from the spec.
+- **Nullable fields:** scan columns through `COALESCE(col, '')` / `COALESCE(col, 0)` so the Go struct stays plain `string` / `int` rather than `sql.NullString` everywhere.
+- **Date filtering:** `published` stays a string column; we format `time.Time` to RFC3339 in queries and let SQLite do lexicographic comparison. Episodes with NULL `published` are excluded by range filters (intentional — they have no date to filter against).
+- 9 tests across upsert idempotency, flag stickiness, mutable-field updates, range filter, limit + ordering, starred-only filter, and full kv set/get/delete. All green under `-race`.
+
 ### 2026-05-18 ~20:10 — Phase 1 scaffolding complete
 
 - Ran `scaffold_project.py pocketcasts-to-markdown --templates` (into a tmp dir; copied into the existing project dir which had `.git/` and `docs/`).
